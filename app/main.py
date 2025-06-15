@@ -23,10 +23,42 @@
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
-from fastapi import FastAPI
-from app.api.routes import router as price_router
-from app.core.database import init_db
+# from fastapi import FastAPI
+# # from app.api.routes import router as price_router
+# from app.core.database import init_db
 
-init_db()
+
+# app = FastAPI()
+# init_db()
+# @app.get("/")
+# def health():
+#     return {"status": "running"}
+# # app.include_router(price_router)
+
+
+# from fastapi import FastAPI
+# from app.core.database import init_db
+
+# app = FastAPI()
+
+# print("🔥 Running init_db() to create tables...")
+# init_db()
+
+# @app.get("/")
+# def root():
+#     return {"status": "running"}
+
+
+from fastapi import FastAPI
+from app.core.database import init_db
+from app.api.routes import router 
 app = FastAPI()
-app.include_router(price_router)
+
+@app.on_event("startup")
+def startup_event():
+    print("🔥 Running init_db() to create tables...")
+    init_db()
+app.include_router(router)
+@app.get("/")
+def root():
+    return {"status": "running"}

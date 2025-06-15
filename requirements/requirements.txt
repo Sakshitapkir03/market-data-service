@@ -1,8 +1,16 @@
+# fastapi
+# uvicorn[standard]
+# sqlalchemy
+# # psycopg2
+# psycopg2-binary
+# confluent-kafka
+# requests
+# pydantic
+
 fastapi
 uvicorn[standard]
 sqlalchemy
-# psycopg2
 psycopg2-binary
-confluent-kafka
-requests
 pydantic
+confluent-kafka
+numpy

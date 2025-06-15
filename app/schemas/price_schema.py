@@ -1,6 +1,12 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
+
+class MarketDataIn(BaseModel):
+    symbol: str
+    price: float
+    provider: str
+
 class LatestPriceResponse(BaseModel):
     symbol: str
     price: float

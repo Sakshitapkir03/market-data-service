@@ -1,46 +1,4 @@
-# version: '3.8'
-# services:
-#   api:
-#     build:
-#       context: .
-#       dockerfile: docker/Dockerfile
-#     ports:
-#       - "8000:8000"
-#     depends_on:
-#       - db
-#       - kafka
-
-#   db:
-#     image: postgres:15
-#     environment:
-#       POSTGRES_DB: marketdb
-#       POSTGRES_USER: user
-#       POSTGRES_PASSWORD: password
-#     ports:
-#       - "5432:5432"
-
-#   zookeeper:
-#     image: confluentinc/cp-zookeeper:latest
-#     environment:
-#       ZOOKEEPER_CLIENT_PORT: 2181
-
-#   kafka:
-#     image: confluentinc/cp-kafka:latest
-#     ports:
-#       - "9092:9092"
-#     environment:
-#       KAFKA_BROKER_ID: 1
-#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-#   # adminer:
-#     image: adminer
-#     restart: always
-#     ports:
-#       - 8080:8080
-
-# version: '3.9'
+version: "3.9"
 
 services:
   api:
@@ -54,9 +12,11 @@ services:
       - kafka
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/marketdb
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   db:
     image: postgres:15
+    container_name: db
     restart: always
     environment:
       POSTGRES_DB: marketdb
@@ -64,26 +24,39 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
     ports:
       - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
     ports:
       - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    depends_on:
+      - zookeeper
 
   adminer:
     image: adminer
+    container_name: adminer
     restart: always
     ports:
-      - 8080:8080
+      - "8080:8080"
+
+volumes:
+  postgres_data:
